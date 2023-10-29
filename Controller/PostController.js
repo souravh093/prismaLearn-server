@@ -2,7 +2,28 @@ import prisma from "../DB/db.config.js";
 
 // fetch all posts
 export const fetchPosts = async (req, res) => {
-  const posts = await prisma.user.findMany();
+  const posts = await prisma.post.findMany({
+    include: {
+      comment: {
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      id: "desc",
+    },
+
+    where: {
+      comment_count: {
+        gt: 0,
+      },
+    },
+  });
 
   return res.json({
     status: 200,
@@ -12,30 +33,29 @@ export const fetchPosts = async (req, res) => {
 };
 
 // fetch single post
-export const singlePost = async (req, res) => {
-  const userId = req.params.id;
-  const post = await prisma.user.findFirst({
-    where: {
-      id: Number(userId),
-    },
-  });
+// export const singlePost = async (req, res) => {
+//   const postId = req.params.id;
+//   const post = await prisma.post.findFirst({
+//     where: {
+//       id: Number(postId),
+//     },
+//   });
 
-  return res.json({
-    status: 200,
-    data: post,
-    msg: "Fetch single posts successfully",
-  });
-};
+//   return res.json({
+//     status: 200,
+//     data: post,
+//     msg: "Fetch single posts successfully",
+//   });
+// };
 
 // create post
 export const createPost = async (req, res) => {
   const { user_id, title, description } = req.body;
-
-  const newPost = await prisma.user.create({
+  const newPost = await prisma.post.create({
     data: {
-      name: name,
-      email: email,
-      password: password,
+      user_id: Number(user_id),
+      title,
+      description,
     },
   });
 
@@ -46,37 +66,58 @@ export const createPost = async (req, res) => {
   });
 };
 
-// update user
-export const updateUser = async (req, res) => {
-  const userId = req.params.id;
-  const { name, email, password } = req.body;
+// update post
+export const updatePost = async (req, res) => {
+  const postId = req.params.id;
+  const { title, description } = req.body;
 
-  const updateUser = await prisma.user.update({
+  const updatePost = await prisma.post.update({
     where: {
-      id: Number(userId),
+      id: Number(postId),
     },
     data: {
-      name,
-      email,
-      password,
+      title,
+      description,
     },
   });
 
   return res.json({
     status: 200,
-    data: updateUser,
-    msg: "User update Successfully",
+    data: updatePost,
+    msg: "Post update Successfully",
   });
 };
 
-// delete user
-export const deleteUser = async (req, res) => {
-  const userId = req.params.id;
-  const user = await prisma.user.delete({
+// delete post
+export const deletePost = async (req, res) => {
+  const postId = req.params.id;
+  const deletePost = await prisma.post.delete({
     where: {
-      id: Number(userId),
+      id: Number(postId),
     },
   });
 
-  return res.json({ status: 200, data: user, msg: "Delete user successfully" });
+  return res.json({
+    status: 200,
+    data: deletePost,
+    msg: "Delete user successfully",
+  });
 };
+
+// Search the post
+export const searchPost = async (req, res) => {
+  const { query } = req.query;
+  const post = await prisma.post.findMany({
+    where: {
+      description: {
+        search: query,
+      },
+    },
+  });
+
+  return res.json({
+    status: 200,
+    data: post,
+    msg: "Search post successfully",
+  });
+}
