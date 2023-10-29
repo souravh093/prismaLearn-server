@@ -1,20 +1,20 @@
 import prisma from "../DB/db.config.js";
 
-// fetch all users
-export const fetchUsers = async (req, res) => {
-  const fetchUsers = await prisma.user.findMany();
+// fetch all posts
+export const fetchPosts = async (req, res) => {
+  const posts = await prisma.user.findMany();
 
   return res.json({
     status: 200,
-    data: fetchUsers,
-    msg: "Fetch all users successfully",
+    data: posts,
+    msg: "Fetch all posts successfully",
   });
 };
 
-// fetch single user
-export const showUser = async (req, res) => {
+// fetch single post
+export const singlePost = async (req, res) => {
   const userId = req.params.id;
-  const user = await prisma.user.findFirst({
+  const post = await prisma.user.findFirst({
     where: {
       id: Number(userId),
     },
@@ -22,28 +22,16 @@ export const showUser = async (req, res) => {
 
   return res.json({
     status: 200,
-    data: user,
-    msg: "Fetch single user successfully",
+    data: post,
+    msg: "Fetch single posts successfully",
   });
 };
 
-// create users
-export const createUser = async (req, res) => {
-  const { name, email, password } = req.body;
-  const findUser = await prisma.user.findUnique({
-    where: {
-      email: email,
-    },
-  });
+// create post
+export const createPost = async (req, res) => {
+  const { user_id, title, description } = req.body;
 
-  if (findUser) {
-    return res.json({
-      status: 400,
-      message: "Email Already Taken. please input another one",
-    });
-  }
-
-  const newUser = await prisma.user.create({
+  const newPost = await prisma.user.create({
     data: {
       name: name,
       email: email,
@@ -53,8 +41,8 @@ export const createUser = async (req, res) => {
 
   return res.json({
     status: 200,
-    data: newUser,
-    msg: "User created successfully",
+    data: newPost,
+    msg: "Post created successfully",
   });
 };
 
