@@ -106,7 +106,7 @@ export const deletePost = async (req, res) => {
 
 // Search the post
 export const searchPost = async (req, res) => {
-  const { query } = req.query;
+  const query = req.query.query;
   const post = await prisma.post.findMany({
     where: {
       description: {
